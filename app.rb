@@ -10,13 +10,16 @@ get("/square/results") do
   erb(:square_results)
 end
 get("/square/new") do
- 
+  
   erb(:homepage)
   
 end
-get("/") do
-  "
-  <h1>Welcome to your Sinatra App!</h1>
-  <p>Define some routes in app.rb</p>
-  "
+get("/square_root/new") do
+  erb(:square_root)
+end
+
+get("/square_root/results") do
+  @num = params.fetch("num").to_f
+  @square_root =  Math.sqrt(@num) 
+  erb(:square_root_results)
 end
