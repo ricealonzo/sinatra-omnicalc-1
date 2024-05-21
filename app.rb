@@ -1,8 +1,10 @@
 require "sinatra"
 require "sinatra/reloader"
+require "bigdecimal" # Added for precise calculations
+require "bigdecimal/util" # Added for converting to BigDecimal
 
 get("/") do
-erb(:homepage)
+  erb(:homepage)
 end
 
 get("/square/results") do
@@ -12,9 +14,7 @@ get("/square/results") do
 end
 
 get("/square/new") do
-  
   erb(:homepage)
-  
 end
 
 get("/square_root/new") do
@@ -22,9 +22,8 @@ get("/square_root/new") do
 end
 
 get("/square_root/results") do
-@num = params.fetch("num").to_f
-@square_root = Math.sqrt(@num)
-
+  @num = params.fetch("num").to_f
+  @square_root = Math.sqrt(@num)
   erb(:square_root_results)
 end
 
@@ -33,39 +32,32 @@ get("/payment/new") do
 end
 
 get("/payment/results") do
-  
-  
-  #The is the variable that contains the 
-  #calculations for "r" in th payment equation!!input apr using erb tags!!.
-  @apr = params.fetch("apr").to_i.to_f
-  @intrest_rate_per_period =(params.fetch("apr").to_i.to_f/100)/12
-  
-  
-  #this is the calculation for n(number of periods) in the equation
-  @number_of_years = params.fetch("number_of_years").to_i.to_f
+  @apr = params.fetch("apr").to_f
+  @number_of_years = params.fetch("number_of_years").to_i
+  @principal = params.fetch("principal").to_f
+
+  # Convert APR to monthly interest rate
+  @interest_rate_per_period = @apr / 100 / 12
+  # Total number of monthly payments
   @number_of_monthly_periods = @number_of_years * 12
-  
-  #this is the calculations for the numerator of the equation
-  @principal = params.fetch("principal")
-  @numerator = @intrest_rate_per_period.to_i.to_f * @principal.to_i.to_f
-  
-  #This is the calculations for the numerator.
-  @denominator = 1 - (1 + @intrest_rate_per_period)** -@number_of_monthly_periods
 
-  #this is the payment equation
-  @payment = @numerator/@denominator
+  # Calculate monthly payment using the formula
+  # if @interest_rate_per_period == 0
+  #   @payment = @principal / @number_of_monthly_periods
+  # else
+    @payment =(@principal * @interest_rate_per_period / (1 - (1 + @interest_rate_per_period)**-@number_of_monthly_periods)).to_fs(:currency)
+  # end
 
-erb(:payment_results)
+  erb(:payment_results)
 end
-
 
 get("/random/new") do
   erb(:random)
 end
 
 get("/random/results") do
-  @min =  params.fetch("min").to_i
-  @max = params.fetch("max").to_i
+  @min_num = params.fetch("min").to_i
+  @max_num = params.fetch("max").to_i
   @random_num = rand(@min..@max)
   erb(:random_results)
 end
